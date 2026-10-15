@@ -44,7 +44,7 @@ class RegularizedLogisticRegression:
         lmbda : float
             The Tikhanov Regularization constant.
         """
-        self.learningRate = 0.00001  # Feel free to play around with this if you'd like, though this value will do
+        self.learningRate = 0.000001  # Feel free to play around with this if you'd like, though this value will do
         self.num_epochs = 10000  # Feel free to play around with this if you'd like, though this value will do
         self.batch_size = 15  # Feel free to play around with this if you'd like, though this value will do
         self.weights = None
@@ -55,7 +55,7 @@ class RegularizedLogisticRegression:
         #                                                                    #
         #####################################################################
 
-        self.lmbda = 100  # TODO: tuned
+        self.lmbda = 1  # TODO: tuned
 
     def train(self, X: np.ndarray, Y: np.ndarray) -> None:
         """

@@ -50,6 +50,9 @@ def main():
 
     # TODO: Once you've determined & set the optimal lambda value from the plots, uncomment
     # the following line to see the test accuracy.
+    # runTrainValSplit and runKFold leave the weights from their last fit, so refit at the
+    # tuned lambda before scoring the test set.
+    RR.train(X_train, Y_train)
     print(f"Test Accuracy: {RR.accuracy(X_test, Y_test)}")
 
 
