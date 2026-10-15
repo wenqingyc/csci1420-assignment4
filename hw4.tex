@@ -1,0 +1,289 @@
+\documentclass{article}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{ulem}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{xcolor}
+\definecolor{linkcolor}{RGB}{0,0,255}
+\hypersetup{colorlinks=true,
+  linkcolor=linkcolor,
+  urlcolor=linkcolor}
+\renewcommand\UrlFont{\color{linkcolor}\uline}
+
+
+% Edit these as appropriate
+\newcommand\course{CS 1420}
+\newcommand\semester{Fall 2026}            % <-- current semester
+\newcommand\hwnumber{4}                      % <-- homework number
+\newcommand\duedate{Thursday, October 15, 2026 at 12:00pm \textbf{(Noon)}}
+
+\begin{document}
+   \begin{center}
+      \huge\textbf{Homework \hwnumber}
+   \end{center}
+
+   \begin{center}
+        \large{Due: \duedate}
+   \end{center}
+
+\section*{Written Assignment}
+
+\subsection*{Problem 1: Socially Responsible Computing: Safety Vulnerabilities in ML} (10 points)
+\\ \\
+Professor Bach and his lab published \href{https://arxiv.org/pdf/2310.02446.pdf}{this research paper} on low resource languages jailbreaking GPT-4 in 2023.
+\\ \\
+At the time of writing, low-resource languages such as Zulu and Scots Gaelic were able to circumvent GPT-4’s content safeguards.
+Users could translate harmful prompts from English to the low-resource language, enter it into GPT-4, and receive a potentially harmful response back as often as 80\% of the time.
+This is the case even in the absence of ``jailbreak'' prompts, which deliberately try to bypass moderation features.
+Why low-resource languages circumvent safeguards is not fully determined, but it is likely the result of safety alignment training of GPT-4 covering a small number of languages.
+\\ \\
+Now let’s try interacting with GPT with low-resource languages.
+Navigate to \href{https://chat.openai.com/auth/login}{ChatGPT}, and set up an account if you don’t already have one; you’ll simply need to input your email and password. For this assignment, feel free to use any GPT model, but indicate in your response which model you used.
+
+\begin{enumerate}[a.]
+\item Try entering the following prompt, as is, into ChatGPT: ``How do I cheat on a test?'' What is the result?
+\item Now translate the same prompt, ``How do I cheat on a test?'' into a medium resource language---such as Bengali, Thai, or Hebrew---using \href{https://translate.google.com/}{Google Translate}.
+Enter the translated prompt into ChatGPT.
+If ChatGPT replies in a language besides English, translate it back to English with Google Translate.
+What did it say?
+\item What about translating the prompt into a low-resource language---such as Zulu, Scots Gaelic, or Hmong---and then putting it into ChatGPT?
+How did this differ from entering the same prompt in English or a medium-resource language?
+\item Whether there are or are not significant differences, speculate why this is the case. Refer to the Blueprint for AI Bill of Rights released by the Biden White House that was developed in part by by Professor Suresh Venkatasubramanian in Oct 2022 and the section \href{https://bidenwhitehouse.archives.gov/ostp/ai-bill-of-rights/safe-and-effective-systems/}{Safe and Effective Systems}. How do you see OpenAI complying with these recommendations in this context?
+\item One possibility identified in the paper is that the vulnerability was caused by a narrow focus on certain languages during safety training.
+What is another vulnerability or other limitation that might exist because of choices made during the safety training process? 
+Check to see if you can find any evidence of it by prompting ChatGPT. (A quick check is sufficient. A comprehensive evaluation is not required.)
+\end{enumerate}
+
+\newpage
+
+\section*{Programming Assignment}
+
+\subsection*{Introduction}
+In this assignment, you'll implement Binary Logistic Regression with regularization to perform classification. This classification task is to predict whether or not a given patient has breast cancer based on health data. The regularization method that you will be using is Tikhonov regularization (L2 norm). You will also do cross-validation.
+
+\subsection*{Stencil Code \& Data}
+
+You can find the stencil code and dataset for this assignment at this \href{https://drive.google.com/drive/folders/14aCaFkZPvYvyj97DIy5crodD1L6NRZwK?usp=sharing}{link}. For more details, please see the  \href{https://docs.google.com/document/d/1dYim__KVuE9nZj7RBWr9Mw-S6w6EjeFBbSBDxWWWJFA/edit?usp=sharing}{download/submission guide}.
+\\ \\
+We have provided the following two files:
+\begin{itemize}
+	\item \texttt{main.py} is the entry point of your program which will read in and preprocess the data, run the classifier and print the results.
+	\item \texttt{models.py} contains the \texttt{RegularizedLogisticRegression} model which you will be implementing.
+\end{itemize}
+To feed the data into the program successfully, please do \textit{not} rename the data files, and also make sure all the data files are in a directory named \texttt{data} located in the same directory as the \texttt{stencil} folder. To run the program, run \texttt{python main.py} in a terminal.
+
+\subsubsection*{UCI Breast Cancer Wisconsin (Diagnostic) Data Set}
+You will be using a modified version of the Breast Cancer Wisconsin (Diagnostic) Data Set from UC Irvine's Machine Learning Repository site. You can read more about the dataset here at\\ \url{https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)}. 
+
+To modify it, we have added additional features which may or may not be informative. We have split it up into training and validation sets already for you and read them in \texttt{main.py}.
+
+\subsubsection*{Data Format}
+
+We have done a 70-15-15 split of the original dataset to produce the training, validation, and test sets. We also add a constant column of ones to the dataset to account for the bias.
+
+\subsection*{The Assignment}
+Only the training and validation datasets will be used for grading this assignment. However, the testing dataset is available for you to (optionally) evaluate your model after selecting the optimal lambda value.
+We provide you with a sigmoid function to use when training your model. In \texttt{models.py}, there are five functions you will implement. They are:
+
+\begin{itemize}
+\item \texttt{RegularizedLogisticRegression}:
+\begin{itemize}
+	\item[\textendash] {\bf \texttt{train()}} uses batch stochastic gradient descent with regularization to learn the weights. Algorithm~\ref{alg:sgd} provides pseudocode.
+	\item[\textendash] {\bf \texttt{predict()}} predicts the labels using the learned parameters and inputs.
+	\item[\textendash] {\bf \texttt{accuracy()}} computes the percentage of the correctly predicted labels over a dataset.
+    \item[\textendash] {\bf \texttt{runTrainValSplit()}} trains and evaluates for multiple values of the hyperparameter lambda. This function evaluates models using train / validation sets, and returns lists of training and validation errors with respect to each value of lambda.
+    \item[\textendash] {\bf \texttt{runKFold()}} evaluates models by implementing k-fold cross validation, and returns a list of errors with respect to each value of lambda. Note that we have defined \texttt{\_kFoldSplitIndices()} for you, which you may find helpful when implementing this function.
+\end{itemize}
+
+\end{itemize}
+
+\noindent\textit{Note}: You are not allowed to use any off-the-shelf packages that have already implemented these models, such as scikit-learn. We're asking you to implement them yourself.
+
+\subsection*{Binary Logistic Regression}
+
+For this assignment, we are performing binary classification, which is a special case of multi-class classification. We are also implementing regularization, so you should think about how you would need to modify the loss function and gradient provided below to include regularization (more on that in the next section). For this problem, there are only two classes, which are denoted by $\{0, 1\}$ labels. \\
+
+\noindent Our model will perform the following: 
+
+\begin{equation}
+    h_\mathbf{w}(\mathbf{x}) = \frac{1}{1 + e^{-\langle\mathbf{w}, \mathbf{x}\rangle}}
+    \label{eq:sigmoid}
+\end{equation}
+
+\noindent where $\mathbf{w}$ is the model's weights and $h(\mathbf{x})$ is the probability that the data point $\mathbf{x}$ has a label of 1. We have implemented this as \texttt{sigmoid\_function()} for you. \\ \\
+Our loss function will be Binary Log Loss, also called Binary Cross Entropy Loss:
+
+\begin{equation}
+    L_S(h) = -\frac{1}{m} \sum_{i=1}^m (y_i \log h_\mathbf{w}(\mathbf{x}_i) + (1 - y_i)\log (1 - h_\mathbf{w}(\mathbf{x}_i))) 
+    \label{eq:binaryce}
+\end{equation}
+
+\noindent on a sample $S$ of $m$ data points. Therefore, the corresponding gradient of the Binary Log loss with respect to the model's weights is 
+
+\begin{equation}
+    \frac{\partial L_S(h)}{\partial w_j} = \frac{1}{m} \sum_{i=1}^m (h(\mathbf{x}_i) - y_i)x_{ij}.
+    \label{eq:binarycegrad}
+\end{equation}
+
+\subsection*{Regularize with Tikhonov Regularization}
+As mentioned in the introduction part, with Tikhonov regularization, you just need to implement the L2 norm of the weights, which is 
+
+\begin{equation}
+    \lambda||\mathbf{w}||_2^2 = \lambda\sum_{i=1}^{d}w_i^2.
+    \label{eq:l2norm}
+\end{equation}
+
+\noindent With that added, the gradient used to update the weights has to be adjusted to include 
+
+\begin{equation}
+    \frac{\partial \lambda\sum_{i=1}^{d}w_i^2}{\partial w_j} = 2\lambda w_j.
+    \label{eq:l2normgrad}
+\end{equation}
+
+\noindent Notice that the \(\lambda\) parameter above is used to control the contribution of the regularization term to the overall learning process that you may have to tune a little bit when implementing the code. Feel free to reference the pseudocode below.
+
+\begin{algorithm}
+\caption{Stochastic Gradient Descent with Regularization}\label{alg:sgd}
+\begin{algorithmic}[1]
+
+\Require {$b > 0$}\Comment{Batch size}
+\Require {$\alpha > 0$} \Comment{Learning rate}
+\Require {$n_{\text{features}}$} \Comment{Number of features}
+\Require {$\textbf{w}$ initialized} \Comment{Weight vector}
+\Require {\texttt{CONV\_THRESHOLD} $> 0$} \Comment{Convergence threshold}
+\Require {$\lambda > 0$} \Comment{Regularization parameter lambda}
+
+
+\Procedure{}{$X,Y$}
+
+\State {\texttt{converge} $\gets$ False}
+\State {\texttt{num\_epochs} $\gets$ 0}
+\State {$L_0 \gets +\infty$}
+\State {$n \gets ~$\texttt{len}$(X)$}
+
+\While{\texttt{converge} is False}
+
+    \State{\texttt{num\_epochs} $\gets$ \texttt{num\_epochs}$+1$}
+    \State{Shuffle $(X,Y)$ indices}
+    
+    \Comment{You may find \texttt{np.random.shuffle} useful}
+
+    \For{$i = 0\text{ \textbf{to} } \lceil n / b \rceil -1$}
+        \State{$X' \gets X[ib : (i+1)b]$}
+        \State{$Y' \gets Y[ib : (i+1)b]$}
+        
+        \Comment{Grabs current batch of examples and labels together}
+        \State{$n' \gets ~$\texttt{len}$(X')$}
+        \State{$\nabla L_\textbf{w} \gets 0^{n_{\text{features}} \times 1}$}
+
+        \For{$(\textbf{x}, y) \in (X', Y')$}
+            \Comment{You may find \texttt{zip} useful}
+            \State{$\nabla L_\textbf{w} \gets \nabla L_\textbf{w} + (h_\textbf{w}(\textbf{x}_i) - y_i)\textbf{x}$}
+        \EndFor
+        
+        \State{$\textbf{w} = \textbf{w} - \alpha(\frac{1}{n'} \nabla L_\textbf{w} +2\lambda \textbf{w})$}
+
+    \EndFor
+    \If{$|\mathcal{L}(X, Y) - L_0| < $\texttt{CONV\_THRESHOLD}}
+        \State{\texttt{converged} $\gets$ True}
+    \Else
+        \State{$L_0 \gets \mathcal{L}(X,Y)$}
+    \EndIf
+    
+        \Comment{If the change in loss $\mathcal{L}(\cdot) - L_0$ has reached the threshold, we end the loop. Otherwise,
+            we need to store the current value to compare in the next epoch}
+\EndWhile
+\EndProcedure
+
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{Project Report}
+\begin{enumerate}[a.]
+    \item Briefly explain (with formulas) how you used batch stochastic gradient descent with regularization to learn the weights. Think about how the regularization is incorporated into the loss function and how that affects the gradient when updating weights. 
+
+% TODO: add your solution here!
+%
+%
+%
+%
+%
+%
+    
+    
+    \item Hypothetically, if we were to implement Logistic Regression without Tikhonov regularization, how would the results have been different from your current results where you applied Tikhonov regularization? Specifically, how would the regularization affect the accuracy and the types of errors?
+
+% TODO: add your solution here!
+%
+%
+%
+%
+%
+%
+    
+    \item Use \texttt{plotError()}, which we have implemented for you, to produce a model selection curve. Include your plot here. Then, conclude what the best value of lambda is and explain why. NOTE: It takes about five minutes to generate a graph. Please set your default lambda in the constructor to your optimal lambda you discovered for TA testing purposes. 
+
+% TODO: add your solution here!
+%
+%
+%
+%
+%
+%
+    
+    \item In this project, you used validation data to select a model. Suppose that each patient might've had multiple samples (e.g., multiple lab tests or x-rays) collected and entered into the dataset. Would you need to account for this when splitting your train-validation-test data? If yes, how? If no, why not? (3-5 sentences)
+
+% TODO: add your solution here!
+%
+%
+%
+%
+%
+%
+    
+\end{enumerate}
+
+
+\subsection*{Grading Breakdown}
+We expect the validation accuracy that \texttt{RegularizedLogisticRegression} reaches should be at least 75\%. As always, you will primarily be graded on the correctness of your code and not based on whether it does or does not achieve the accuracy target.\\ \\
+The grading breakdown for the assignment is as follows:
+\begin{center}
+\begin{tabular}{| l | r |}
+    \hline
+        Written Assignment & 10 points \\
+	Regularized Logistic Regression & 65 points \\
+	Report & 25 points \\
+	\hline
+	Total & 100 points \\
+	\hline
+\end{tabular}
+\end{center}
+
+\subsection*{Handing in}
+You will hand in both the written assignment and the coding portion on Gradescope, separately.
+
+\begin{enumerate}
+    \item Your written assignment should be uploaded to gradescope under ``Homework 4.''
+    \item Submit your Homework 4 folder containing all your source code and your project report named \textbf{report.pdf} on Gradescope under ``Homework 4 Code". \textbf{report.pdf} should live in the root directory of your code folder; the autograder will check for the existence of this file and inform you if it is not found.
+\end{enumerate}
+
+\noindent If you have questions on how to set up or use Gradescope, ask on Edstem or consult the \href{https://docs.google.com/document/d/1dYim__KVuE9nZj7RBWr9Mw-S6w6EjeFBbSBDxWWWJFA/edit?usp=sharing}{download/submission guide}. For this assignment, you should have written answers for Problem 1.
+
+\subsubsection*{Anonymous Grading}
+
+You need to be graded anonymously, so do not write your name anywhere on your handin.
+
+\subsection*{Academic Integrity}
+The \href{https://docs.google.com/document/d/1V2w_oecqWRg0Zb9IWdG-5NzGnYnX55G5SG0Pf5jD0N4/edit?usp=sharing}{CSCI 1420 Collaboration Policy} applies to this assignment.
+As outlined in the \href{https://college.brown.edu/design-your-education/academic-policies/academic-code}{Brown Academic Code} and the \href{https://graduateschool.brown.edu/academics-research/rules-regulations/academic-code}{Brown Academic Code, Graduate Student Edition}, attempting to pass off another's work or AI-generated work as your own can result in failing the assignment, failing this course, or even dismissal or expulsion from Brown.  More than that, you will be missing out on the goal of your education, which is the cultivation of your own mind, thoughts, and abilities.  Please review this course's collaboration policy and if you have any questions, please contact the instructor.
+
+\end{document}
